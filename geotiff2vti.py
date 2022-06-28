@@ -22,29 +22,28 @@ import math as mt
 import numpy as np
 import utm
 
-# Set constants
-rEarth = 6371 #km
-degToRad = mt.pi/180
-
 # Provide file to convert
-inFile = 'SanAnBedrock.tif'
+inFile = 'inFileExample.tiff'
 print('File to convert:   {}'.format(inFile))
 
 # Provide name for output file
-outFile = 'SanAnBedrock.vti'
+outFile = 'outFileExample.vti'
 print('File to create:   {}'.format(outFile))
 
 # Output variable name
 outVar = 'Elevation'
+
+#==============================================================================
+
+# Set constants
+rEarth = 6371 #km
+degToRad = mt.pi/180
 
 # Open the file as a geotiff and as an array
 img = rio.open(inFile)
 data = img.read()
 d = np.array(np.fliplr(data),dtype='float32')
 dataFull = img.read()
-
-# Flip the data to account for geotiffs being read from the top down.
-#d = np.flip(d, axis=0)
 
 # Get origin data
 ox = img.bounds.left
@@ -70,8 +69,6 @@ print('Data width:    {} km'.format(widthKm))
 print('Data height:   {} km'.format(heightKm))
 print('Min elevation: {} km'.format(np.min(data)))
 print('Max elevation: {} km'.format(np.max(data)))
-maxElev = np.max(data)
-minElev = np.min(data)
 
 # Get spacing of the points 
 dx = widthKm/(dataFull.shape[2]-1)
@@ -93,8 +90,7 @@ nbyte=nbyte+byte_int
 bnbyte = np.int32(nbyte)
 
 # Create a new file and start writing to it
-# Can also open the file with the 'wb' tag which writes to binary. To write ascii
-#  in a binary file, use the following tag: .encode('ascii')
+# 'wb' opens the file in binary, and then we use ".encode(ascii)" to write ascii
 nfile = open(outFile, 'wb')
 
 nfile.write('<?xml version=\"1.0\"?>\n'.encode('ascii'))
@@ -111,6 +107,7 @@ nfile.write('</ImageData>\n'.encode('ascii'))
 nfile.write('<AppendedData encoding=\"raw\">\n'.encode('ascii'))
 nfile.write('_'.encode('ascii'))
 
+# Write binary data
 nfile.write(bnbyte)
 nfile.write(d)
 
